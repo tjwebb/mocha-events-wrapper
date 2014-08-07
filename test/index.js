@@ -1,29 +1,29 @@
 var assert = require('assert');
 var Installer = require('../');
 
-var installer = new Installer({ require: './mocktest' });
+var runner = new Installer({ require: './mocktest' });
 var phases = 0, tasks = 0;
 
-installer.once('done', function (failures) {
+runner.once('done', function (failures) {
   assert(failures === 0);
 });
 
-installer.on('suite', function (event) {
+runner.on('suite', function (event) {
   assert(event.suite.title);
   phases++;
 });
-installer.on('pass', function (event) {
+runner.on('pass', function (event) {
   assert(event.test.title);
   tasks++;
 });
-installer.on('fail', function (event) {
+runner.on('fail', function (event) {
   console.error(event.error);
   process.exit(1);
 });
 
-installer.on('done', function (event) {
+runner.on('done', function (event) {
   assert(tasks === 5);
   assert(phases === 3);
 });
 
-installer.run();
+runner.run();
