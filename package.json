@@ -1,7 +1,7 @@
 {
   "name": "mocha-events-wrapper",
   "version": "0.5.0",
-  "description": "Wrapper for mocha.run that fires more consumable events",
+  "description": "Wrapper for mocha.run that fires simpler, more consumable events",
   "main": "index.js",
   "dependencies": {
     "mocha": "^1.21.3"

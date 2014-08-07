@@ -35,12 +35,12 @@ api.prototype.run = function (file) {
   });
 
   runner.on('suite', function (suite) {
-    self.emit('phase', { phase: suite, level: level });
+    self.emit('suite', { suite: suite, level: level });
     level++;
   });
   runner.on('suite end', function (suite) {
     level--;
-    self.emit('phase end', { phase: suite, level: level });
+    self.emit('suite end', { suite: suite, level: level });
   });
   runner.on('pass', function (test) {
     self.emit('pass', { test: test, level: level });

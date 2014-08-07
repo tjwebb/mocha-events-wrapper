@@ -8,8 +8,8 @@ installer.once('done', function (failures) {
   assert(failures === 0);
 });
 
-installer.on('phase', function (event) {
-  assert(event.phase.title);
+installer.on('suite', function (event) {
+  assert(event.suite.title);
   phases++;
 });
 installer.on('pass', function (event) {
