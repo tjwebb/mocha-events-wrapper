@@ -30,6 +30,7 @@ api.prototype.run = function (file) {
 
   var self = this;
   var level = 0;
+  var current = 0;
   var runner = this.mocha.run(function (failures) {
     self.emit('done', failures);
   });
@@ -45,9 +46,12 @@ api.prototype.run = function (file) {
     self.emit('suite end', { suite: suite, level: level });
   });
   runner.on('pass', function (test) {
-    self.emit('pass', { test: test, level: level });
+    self.emit('pass', { test: test, level: level, index: current });
   });
   runner.on('fail', function (test) {
-    self.emit('fail', { test: test, level: level });
+    self.emit('fail', { test: test, level: level, index: current });
+  });
+  runner.on('test end', function (suite) {
+    current++;
   });
 };
