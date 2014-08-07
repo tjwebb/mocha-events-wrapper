@@ -12,7 +12,7 @@ var events = require('events');
  */
 var api = module.exports = function (options) {
   options || (options = { });
-  options.ui = 'bdd';
+  options.reporter = 'base';
 
   this.mocha = new Mocha(options);
   this.mocha.addFile(path.resolve(path.dirname(module.parent.filename), options.require));
@@ -33,6 +33,8 @@ api.prototype.run = function (file) {
   var runner = this.mocha.run(function (failures) {
     self.emit('done', failures);
   });
+
+  self.emit('start', { total: runner.total, runner: runner });
 
   runner.on('suite', function (suite) {
     self.emit('suite', { suite: suite, level: level });

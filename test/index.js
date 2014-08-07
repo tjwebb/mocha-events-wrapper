@@ -1,8 +1,12 @@
 var assert = require('assert');
-var Installer = require('../');
+var Runner = require('../');
 
-var runner = new Installer({ require: './mocktest' });
+var runner = new Runner({ require: './mocktest' });
 var phases = 0, tasks = 0;
+
+runner.once('start', function (event) {
+  assert(event.total === 5);
+});
 
 runner.once('done', function (failures) {
   assert(failures === 0);
