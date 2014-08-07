@@ -1,63 +1,51 @@
-'use strict';
+var Mocha = require('mocha');
+var fs = require('fs');
+var path = require('path');
+var util = require('util');
+var events = require('events');
 
 /**
- * Module dependencies.
- */
-var Base = require('mocha/lib/reporters/base'),
-  utils = require('mocha/lib/utils');
-  
-/**
- * Expose `Doc`.
- */
-module.exports = EventDoc;
-
-/**
- * Initialize a new `Doc` reporter.
+ * @param options.require
  *
- * @param {Runner} runner
- * @api public
+ * @public
+ * @constructor
  */
-function EventDoc(runner) {
-  Base.call(this, runner);
+var api = module.exports = function (options) {
+  options || (options = { });
+  options.ui = 'bdd';
 
-  var self = this,
-    stats = this.stats,
-    total = runner.total,
-    indents = 2;
+  this.mocha = new Mocha(options);
+  this.mocha.addFile(path.resolve(path.dirname(module.parent.filename), options.require));
+};
 
-  function indent() {
-    return new Array(indents).join('  ');
-  }
+util.inherits(api, events.EventEmitter);
 
-  runner.on('suite', function(suite){
-    if (suite.root) return;
+/**
+ * @fires suite
+ * @fires suite end
+ * @fires pass
+ * @fires fail
+ */
+api.prototype.run = function (file) {
 
-    ++indents;
-    runner.emit('suite:section', '%s<section class="suite">' + indent());
-    ++indents;
-    runner.emit('suite:h1', '%s<h1>%s</h1>'+ indent() + utils.escape(suite.title));
-    runner.emit('suite:dl', '%s<dl>'+ indent());
+  var self = this;
+  var level = 0;
+  var runner = this.mocha.run(function (failures) {
+    self.emit('done', failures);
   });
 
-  runner.on('suite end', function(suite){
-    if (suite.root) return;
-
-    runner.emit('suite end:dl', '%s</dl>'+ indent());
-    --indents;
-    runner.emit('suite end:section', '%s</section>'+ indent());
-    --indents;
+  runner.on('suite', function (suite) {
+    self.emit('phase', { phase: suite, level: level });
+    level++;
   });
-
-  runner.on('pass', function(test){
-    runner.emit('pass:dt', '%s  <dt>%s</dt>'+ indent() + utils.escape(test.title));
-    var code = utils.escape(utils.clean(test.fn.toString()));
-    runner.emit('pass:dd', '%s  <dd><pre><code>%s</code></pre></dd>'+ indent() + code);
+  runner.on('suite end', function (suite) {
+    level--;
+    self.emit('phase end', { phase: suite, level: level });
   });
-
-  runner.on('fail', function(test, err){
-    runner.emit('fail:dt', '%s  <dt class="error">%s</dt>'+ indent() + utils.escape(test.title));
-    var code = utils.escape(utils.clean(test.fn.toString()));
-    runner.emit('fail:dd', '%s  <dd class="error"><pre><code>%s</code></pre></dd>'+ indent() + code);
-    runner.emit('fail:dd', '%s  <dd class="error">%s</dd>'+ indent() + utils.escape(err));
+  runner.on('pass', function (test) {
+    self.emit('pass', { test: test, level: level });
   });
-}
+  runner.on('fail', function (test) {
+    self.emit('fail', { test: test, level: level });
+  });
+};
